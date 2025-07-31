@@ -1,28 +1,30 @@
-# Use Node.js base image
+# Stage 1: Build and test
 FROM node:21 AS backend-builder
 
 # Set working directory inside the container
 WORKDIR /app
 
-# Copy package.json and install dependencies
+# Copy all files and install dependencies
 COPY . .
 RUN npm install
 
-#test
-RUN npn run test
+# ✅ FIXED: Typo (was `npn run test`)
+RUN npm run test
 
-
-#state2
+# Stage 2: Production image
 FROM node:21-slim
 
+# Set working directory
 WORKDIR /app
 
-# Copy the entire source code
+# Copy files from builder stage
 COPY --from=backend-builder /app .
 
+# Use a separate env file for Docker if needed
 COPY .env.docker .env
-# Expose the app port
+
+# Expose app port (change this if your app uses a different port)
 EXPOSE 5000
 
-# Command to run the app
+# Start the app
 CMD ["npm", "start"]
